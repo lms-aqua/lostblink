@@ -1,0 +1,51 @@
+{
+  "blink": {
+    "login": {
+      "username": "EMAIL_ADDRESS_HERE",
+      "password": "PASSWORD_HERE"
+    },
+    "poll_interval": 30,
+    "history_days": 7,
+    "request_timeout": 30
+  },
+
+  "live": {
+    "_comment": "off | on_motion | always. Live view drains Blink batteries fast: continuous use flattens them in 1-3 days. Use 'always' only for mains-powered cameras.",
+    "mode": "on_motion",
+    "max_sessions_per_hour": 6,
+    "min_seconds_between_sessions": 60,
+    "daily_seconds_budget": 1800,
+    "require_battery_ok": true,
+    "mains_powered": []
+  },
+
+  "cameras": {
+    "_comment": "Empty 'enabled' means all discovered cameras. 'disabled' always wins. Names are matched case-insensitively.",
+    "enabled": [],
+    "disabled": [],
+    "max_failures": 5,
+    "restart_delay_seconds": 30,
+    "max_restart_delay_seconds": 900
+  },
+
+  "rtsp": {
+    "address": "mediamtx",
+    "port": 8554,
+    "transport": "tcp"
+  },
+
+  "ffmpeg": {
+    "_comment": "hwaccel: leave empty for software, or set qsv / vaapi / cuda. Only affects decoding; publishing is a stream copy.",
+    "hwaccel": "",
+    "hwaccel_device": "",
+    "loglevel": "error",
+    "still_video_duration": 0.5
+  },
+
+  "paths": {
+    "work": "/working",
+    "config": "/config"
+  },
+
+  "log_level": "INFO"
+}

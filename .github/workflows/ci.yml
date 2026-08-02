@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.11 is in the matrix deliberately: upstream blinkbridge is
+        # 3.12-only by accident, via a PEP 701 nested-quote f-string that
+        # is a SyntaxError on anything older (bug B-02).
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install
+        run: pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Type check
+        run: mypy lostblink
+        continue-on-error: true
+
+      - name: Test
+        run: pytest -q --cov=lostblink --cov-report=term-missing
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t lostblink:ci .
+      - name: Smoke test the entrypoint
+        run: docker run --rm lostblink:ci --help

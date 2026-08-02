@@ -1,0 +1,11 @@
+﻿.venv/
+__pycache__/
+*.pyc
+config/config.json
+config/.cred.json
+.cred.json
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+working/

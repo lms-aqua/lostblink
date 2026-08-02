@@ -1,0 +1,38 @@
+# MediaMTX configuration for lostblink.
+#
+# Upstream ships no MediaMTX config at all, so the defaults govern: any host
+# that can reach port 8554 may publish to any path, including overwriting a
+# camera's stream. This locks publishing down to the bridge.
+
+logLevel: info
+logDestinations: [stdout]
+
+# RTSP only. Uncomment the HLS/WebRTC ports in compose.yaml as well if you
+# enable those.
+rtsp: yes
+rtspTransports: [tcp]
+rtspAddress: :8554
+
+hls: no
+webrtc: no
+srt: no
+rtmp: no
+
+# Do not keep dead paths around; lostblink recreates them on reconnect.
+pathDefaults:
+  # Only the bridge container may publish.
+  publishUser: ""
+  publishPass: ""
+  publishIPs: [172.16.0.0/12, 192.168.0.0/16, 10.0.0.0/8]
+
+  # Readers are unrestricted by default so Frigate/Scrypted can consume
+  # without extra config. Set readUser/readPass if the port is exposed
+  # beyond your LAN -- and it should not be.
+  readIPs: []
+
+  # A live handover splices two MPEG-TS sources together, so timestamps jump.
+  # Give the muxer room to absorb it.
+  writeQueueSize: 1024
+
+paths:
+  all_others:

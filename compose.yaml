@@ -1,0 +1,46 @@
+services:
+  lostblink:
+    build: .
+    image: lostblink:local
+    container_name: lostblink
+    restart: unless-stopped
+    # Upstream starts both services simultaneously, so ffmpeg tries to publish
+    # before MediaMTX is listening, burns failure counters, and can permanently
+    # disable cameras on a cold start (bug B-22).
+    depends_on:
+      mediamtx:
+        condition: service_healthy
+    volumes:
+      - ./config:/config
+      # Temporary clips and concat files. tmpfs keeps churn off the disk;
+      # everything here is disposable.
+      - type: tmpfs
+        target: /working
+        tmpfs:
+          size: 134217728  # 128 MiB
+    environment:
+      - LOSTBLINK_CONFIG=/config/config.json
+      # Prefer secrets over putting credentials in the bind-mounted config
+      # file (bug B-23).
+      # - LOSTBLINK_USERNAME=${BLINK_USERNAME}
+      # - LOSTBLINK_PASSWORD=${BLINK_PASSWORD}
+    tty: true  # colour logs
+    security_opt:
+      - no-new-privileges:true
+
+  mediamtx:
+    image: bluenviron/mediamtx:1.9.3
+    container_name: mediamtx
+    restart: unless-stopped
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml:ro
+    ports:
+      - "8554:8554"   # RTSP
+      # - "8888:8888" # HLS, if you want browser playback
+      # - "8889:8889" # WebRTC
+    healthcheck:
+      test: ["CMD", "sh", "-c", "nc -z 127.0.0.1 8554"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s

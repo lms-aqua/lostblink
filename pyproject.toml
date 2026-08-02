@@ -1,0 +1,86 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lostblink"
+version = "0.1.0"
+description = "Live RTSP streams from Blink cameras, including real live view over Blink's proprietary IMMI and RTSPS transports"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "wish311" }]
+keywords = ["blink", "rtsp", "immi", "camera", "mediamtx", "frigate", "nvr"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Multimedia :: Video",
+  "Topic :: Home Automation",
+]
+
+# Pinned with floors AND ceilings on purpose. blinkpy's auth flow has changed
+# twice in the last year and each change broke downstream bridges -- upstream
+# blinkbridge pins nothing at all (bug B-21).
+dependencies = [
+  "blinkpy>=0.23.0,<0.24",
+  "aiohttp>=3.9,<4",
+  "rich>=13.7,<15",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+  "pytest-cov>=5.0",
+  "ruff>=0.6",
+  "mypy>=1.11",
+]
+
+[project.scripts]
+lostblink = "lostblink.__main__:main"
+
+[project.urls]
+Documentation = "https://github.com/lms-aqua/lostblink/tree/main/docs"
+
+[tool.setuptools.packages.find]
+include = ["lostblink*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = ["error::DeprecationWarning:lostblink.*"]
+
+[tool.ruff]
+# Catches PEP 701 nested-quote f-strings, which made upstream's config.py
+# unparseable on anything below 3.12 (bug B-02).
+target-version = "py311"
+line-length = 90
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "DTZ", "SIM", "RUF"]
+ignore = [
+  "SIM105",  # contextlib.suppress is not always clearer
+  "B008",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests reach into private de-framing internals on purpose.
+"tests/*" = ["SLF001", "E501", "RUF043"]
+# LiveViewBusy / LiveViewRefused read better than ...BusyError / ...RefusedError,
+# and they all subclass LiveViewError anyway.
+"lostblink/blink/liveview.py" = ["N818"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
+exclude = ["tests/"]
+
+[[tool.mypy.overrides]]
+module = ["blinkpy.*"]
+ignore_missing_imports = true
