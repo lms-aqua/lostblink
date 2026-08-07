@@ -26,7 +26,7 @@ classifiers = [
 # twice in the last year and each change broke downstream bridges -- upstream
 # blinkbridge pins nothing at all (bug B-21).
 dependencies = [
-  "blinkpy>=0.23.0,<0.24",
+  "blinkpy==0.25.9",
   "aiohttp>=3.9,<4",
   "rich>=13.7,<15",
 ]
