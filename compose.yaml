@@ -39,8 +39,8 @@ services:
       # - "8888:8888" # HLS, if you want browser playback
       # - "8889:8889" # WebRTC
     healthcheck:
-      test: ["CMD", "sh", "-c", "nc -z 127.0.0.1 8554"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-      start_period: 5s
+  test: ["CMD", "/mediamtx", "--version"]
+  interval: 5s
+  timeout: 3s
+  retries: 10
+  start_period: 5s
